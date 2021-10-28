@@ -1,7 +1,7 @@
 ---
 - name: Localhost> Record existing DNS Records into a new dictionary
   debug:
-    msg: "{{ lookup('community.general.dig', '' + item.hostname + {% if dnsimple_subdomain is defined %}{{ dnsimple_subdomain  }}{% endif %} + dnsimple_domain )}}"
+    msg: "{{ lookup('community.general.dig', '' + item.hostname + dnsimple_domain )}}"
   with_items:
   - "{{ dnsimple_hosts_to_add }}"
   register: dnsimple_hosts_existing_records
