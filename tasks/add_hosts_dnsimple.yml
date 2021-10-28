@@ -1,0 +1,17 @@
+---
+- name: DNSimple API> Add hosts from hostfile YML to DNSimple
+  community.general.dnsimple:
+    account_email:        "{{ dnsimple_user }}"
+    account_api_token:    "{{ dnsimple_key }}"
+    domain:               "{{ dnsimple_domain }}"
+    sandbox:              "{{ dnsimple_sandbox }}"
+    state:                present
+    record:               "{{ item.item.hostname }}"
+    value:                "{{ item.item.public }}"
+    type:                 A
+  delegate_to:            localhost
+  register: existing_matching_records
+  with_items:
+    - "{{ dnsimple_hosts_existing_records.results }}"
+  when: item.msg == 'NXDOMAIN'
+...

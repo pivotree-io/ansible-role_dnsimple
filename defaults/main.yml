@@ -1,0 +1,15 @@
+---
+vault_file: default_vault.yml
+dnsimple_domain: "sassyatemyclothes.com"
+dnsimple_subdomain: "test"
+dnsimple_sandbox: True
+dnsimple_hosts_to_add:
+  - hostname: test-record-one
+    public: 127.0.0.1
+
+  - hostname:  test-record-two
+    public: 127.0.0.2
+
+  - hostname: test-record-three
+    public: 127.0.0.3
+...

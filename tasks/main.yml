@@ -1,0 +1,5 @@
+---
+#- { import_tasks: install_dependencies.yml }
+- { import_tasks: get_existing_hosts.yml  }
+- { import_tasks: add_hosts_dnsimple.yml }
+...
