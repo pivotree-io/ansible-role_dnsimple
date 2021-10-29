@@ -56,13 +56,13 @@ vault_account2:
     dnsimple_hosts_to_add:
       - hostname: test-record-one
         record_type: A
-        ip_addr: 127.0.0.1
+        content: 127.0.0.1
       - hostname:  test-record-two
         record_type: A
-        ip_addr: 127.0.0.2
+        content: 127.0.0.2
       - hostname: test-record-three
         record_type: A
-        ip_addr: 127.0.0.3
+        content: 127.0.0.3
 
     vault:
       account1:
@@ -80,12 +80,12 @@ vault_account2:
 ** get_existing_hosts
 - Primary role of this role is to add new hosts, not change/remove. This role takes the dictionary defined in play variables and checks against the current entries in DNSimpe. A new dictionary is created with an additional fact stating whether or not it exists:
   #+begin_src sh
-ok: [127.0.0.1] => (item={'msg': 'already_in_dns', 'failed': False, 'changed': False, 'item': {'name': 'test-record-four.int.new', 'ip_addr': '111.111.4.5'}, 'ansible_loop_var': 'item'}) => {
+ok: [127.0.0.1] => (item={'msg': 'already_in_dns', 'failed': False, 'changed': False, 'item': {'name': 'test-record-four.int.new', 'content': '111.111.4.5'}, 'ansible_loop_var': 'item'}) => {
     "msg": "already_in_dns"
 }
 
 TASK [dnsimple : DNSimple API> Add hosts from hostfile YML to DNSimple] ****************************************************************************************************************************************************************************************
-skipping: [127.0.0.1] => (item={'msg': 'already_in_dns', 'failed': False, 'changed': False, 'item': {'name': 'test-record-one', 'ip_addr': '192.168.2.31'}, 'ansible_loop_var': 'item'})
+skipping: [127.0.0.1] => (item={'msg': 'already_in_dns', 'failed': False, 'changed': False, 'item': {'name': 'test-record-one', 'content': '192.168.2.31'}, 'ansible_loop_var': 'item'})
   #+end_src
 
 - This dictionary is passed to the next task:
