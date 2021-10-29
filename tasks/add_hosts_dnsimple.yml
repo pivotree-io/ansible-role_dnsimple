@@ -3,9 +3,6 @@
     msg: "{{ item.msg }}"
   with_items: "{{ dnsimple_hosts_list_with_existing_records.results }}"
 
-- debug:
-    msg: "Name: {{ item.item.name }}, value: {{ item.item.content }}, type: {{ item.item.record_type }}'
-
 - name: DNSimple API> Add hosts from hostfile YML to DNSimple
   community.general.dnsimple:
     account_email:        "{{ dnsimple_user }}"
