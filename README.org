@@ -95,4 +95,8 @@ skipping: [127.0.0.1] => (item={'msg': 'already_in_dns', 'failed': False, 'chang
     - "{{ dnsimple_hosts_list_with_existing_records.results }}"
   when: item.msg != "already_in_dns"
   #+end_src
-* TODO Add per host record type: cname, a, mx, txt, etc
+* DONE Add per host record type: cname, a, mx, txt, etc
+* TODOs
+- Add a "change" option that will not only add but make updates to hosts
+- Add a "decom" option so that hosts no longer in use can be removed
+- Tie in with Device42 instead of manual creation of host dictionaries
