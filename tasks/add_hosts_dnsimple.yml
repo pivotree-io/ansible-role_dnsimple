@@ -11,7 +11,7 @@
     sandbox:              "{{ dnsimple_sandbox }}"
     state:                present
     record:               "{{ item.item.name }}"
-    value:                "{{ item.item.ip_addr }}"
+    value:                "{{ item.item.content }}"
     type:                 A
   delegate_to:            localhost
   register: existing_matching_records
