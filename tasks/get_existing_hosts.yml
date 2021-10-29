@@ -15,33 +15,38 @@
 #Since the community plugin does not support this, we will need to get the accountID for the needed API calls
 - name: get accountID
   uri:
-    url: "https://api.sandbox.dnsimple.com/v2/whoami"
+    url: "https://api.sandbox.dnsimple.com/v2/accounts"
     method: GET
     headers: "{{ my_headers }}"
-  register: account_info
+  register: dnsimple_get_account_info
 
 - name: Extract AccountID
   set_fact:
-    account_id: "{{ account_info.user.id }}"
+    account_id: "{{ dnsimple_get_account_info.json.data[0].id }}"
 
-- debug:
-    msg: "{{ account_id }}"
+- name: Build the API URL, if accountID is set already, use that, else use best guess from above.
+  set_fact:
+    dnsimple_records_url: "https://api.sandbox.dnsimple.com/v2/{% if dnsimple_account_id is defined %}{{ dnsimple_account_id }}{% else %}{{ account_id }}{% endif %}/zones/{{ dnsimple_domain }}/records"
 
-#- name: get list of current records
-#  uri:
-#    url: "https://api.sandbox.dnsimple.com/v2/1691/zones/" + dnsimple_domain + "/records"
-#    method: GET
-#    headers: "{{ my_headers }}"
-#  register: my_return
-#
-#- name: create a dict from current records
-#  set_fact:
-#    existing_records: "{{ my_return.json.data }}"
-#
-#- name: test debg
-#  debug:
-#    msg: "already_in_dns"
-#  with_items: "{{ the_hosts }}"
-#  when: "{{ existing_records|selectattr('name', 'equalto', item.name)|list|json_query('[*].name') }}"
-#  register: existing
+- name: get list of current records
+  uri:
+    url: "{{ dnsimple_records_url }}"
+    method: GET
+    headers: "{{ my_headers }}"
+  register: dnsimple_current_records
+
+- name: create a dict from current records
+  set_fact:
+    dnsimple_current_records_dict: "{{ dnsimple_current_records.json.data }}"
+
+- name: Create new dictionary showing if records are already set
+  debug:
+    msg: "{% if dnsimple_current_records_dict|selectattr('name', 'equalto', item.name)|list|json_query('[*].name') %}already_in_dns{% else %}not_in_dns{% endif %}"
+  with_items: "{{ dnsimple_hosts_to_add }}"
+  #when: "dnsimple_current_records_dict|selectattr('name', 'equalto', item.name)|list|json_query('[*].name')"
+  register: dnsimple_hosts_list_with_existing_records
+
+- name: Show what has been changed
+  debug:
+    msg:  "{{ dnsimple_hosts_list_with_existing_records }}"
 ...
