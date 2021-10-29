@@ -12,15 +12,19 @@ dnsimple_user: '#This should reference: vaut.<user>.user'
 dnsimple_key: '#This should reference: vaut.<key>.user'
 dnsimple_domain: '#This is the DNSimple Domain to work under: https://dnsimple.com/a/<acct#>/domains'
 dnsimple_sandbox: '#Set to true if this is a sandbox account, otherwise False'
-dnsimple_hosts_to_add: '#YAML describing hosts to add, see [[#-example-playbook-][Example Playbook]]'
+dnsimple_account_id: '#Found under the correct domain you want to access, instead of a userID'
+dnsimple_hosts_to_add: '#Dictionary describing hosts to add, see [[#-example-playbook-][Example Playbook]]'
 vault:
   sandbox:
     user: "{{ vault_sandbox.vault_user }}"
     key: "{{ vault_sandbox.vault_key }}"
 
+dnsimple_headers:
+  Authorization: 'Bearer <account api token>'
+  Accepts:  "application/json"
 #+end_src
 * Vault
-- vault.yml content should be loaded into
+- vault.yml content should contain your API keys and usernames, and referenced in your playbook variables as shown above for easy search via grep.
 * Example Playbook
 :PROPERTIES:
 :CUSTOM_ID: -example-playbook-
@@ -34,18 +38,22 @@ vault:
     dnsimple_key: "{{ vault.sandbox.key }}"
     dnsimple_domain: "sassyatemyclothes.com"
     dnsimple_sandbox: True
+    dnsimple_account_id: 1691
+    dnsimple_headers:
+      Authorization: 'Bearer <account api token>'
+      Accepts:  "application/json"
+
     dnsimple_hosts_to_add:
       - hostname: test-record-one
-        record_type: CNAME
+        record_type: A
         public: 127.0.0.1
 
       - hostname:  test-record-two
+        record_type: A
         public: 127.0.0.2
 
       - hostname: test-record-three
-        public: 127.0.0.3
-
-      - hostname: google
+        record_type: A
         public: 127.0.0.3
     vault:
       sandbox:
@@ -53,8 +61,7 @@ vault:
         key: "{{ vault_sandbox.vault_key }}"
   roles:
     - { role: dnsimple }
-
 ...
 #+end_src
-* TODO Save DNS records prior to run
+* DONE Save DNS records prior to run
 * TODO Add per host record type: cname, a, mx, txt, etc
