@@ -17,7 +17,7 @@
   uri:
     url: "https://api.sandbox.dnsimple.com/v2/accounts"
     method: GET
-    headers: "{{ my_headers }}"
+    headers: "{{ dnsimple_headers }}"
   register: dnsimple_get_account_info
 
 - name: Extract AccountID
@@ -32,7 +32,7 @@
   uri:
     url: "{{ dnsimple_records_url }}"
     method: GET
-    headers: "{{ my_headers }}"
+    headers: "{{ dnsimple_headers }}"
   register: dnsimple_current_records
 
 - name: create a dict from current records
