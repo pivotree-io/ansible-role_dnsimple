@@ -3,6 +3,9 @@
     msg: "{{ item.msg }}"
   with_items: "{{ dnsimple_hosts_list_with_existing_records.results }}"
 
+- debug:
+    msg: "Name: {{ item.item.name }}, value: {{ item.item.content }}, type: {{ item.item.record_type }}'
+
 - name: DNSimple API> Add hosts from hostfile YML to DNSimple
   community.general.dnsimple:
     account_email:        "{{ dnsimple_user }}"
@@ -10,9 +13,9 @@
     domain:               "{{ dnsimple_domain }}"
     sandbox:              "{{ dnsimple_sandbox }}"
     state:                present
-    record:               "{{ item.item.name }}"
-    value:                "{{ item.item.content }}"
-    type:                 A
+    record:               '{{ item.item.name }}'
+    value:                '{{ item.item.content }}'
+    type:                 '{{ item.item.record_type }}'
   delegate_to:            localhost
   register: existing_matching_records
   with_items:
