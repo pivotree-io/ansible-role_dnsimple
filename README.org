@@ -47,14 +47,13 @@ dnsimple_headers:
       - hostname: test-record-one
         record_type: A
         public: 127.0.0.1
-
       - hostname:  test-record-two
         record_type: A
         public: 127.0.0.2
-
       - hostname: test-record-three
         record_type: A
         public: 127.0.0.3
+
     vault:
       sandbox:
         user: "{{ vault_sandbox.vault_user }}"
