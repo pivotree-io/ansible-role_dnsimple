@@ -6,6 +6,7 @@
 - Python Libraries:
   - dnsimple
   - dnspython
+  - jmespath
 * Role Variables
 #+begin_src
 dnsimple_user: '#This should reference: vaut.<user>.user'
@@ -16,15 +17,24 @@ dnsimple_account_id: '#Found under the correct domain you want to access, instea
 dnsimple_hosts_to_add: '#Dictionary describing hosts to add, see [[#-example-playbook-][Example Playbook]]'
 vault:
   sandbox:
-    user: "{{ vault_sandbox.vault_user }}"
-    key: "{{ vault_sandbox.vault_key }}"
+    user: "{{ vault_account1.vault_user }}"
+    key: "{{ vault_account2.vault_key }}"
 
 dnsimple_headers:
-  Authorization: 'Bearer <account api token>'
+  Authorization: "Bearer {{ vault.sandbox.key }}"
   Accepts:  "application/json"
 #+end_src
 * Vault
-- vault.yml content should contain your API keys and usernames, and referenced in your playbook variables as shown above for easy search via grep.
+- vault.yml content should contain your API keys and usernames, and referenced in your playbook variables as shown above for easy search via grep. Vault should looke like:
+  #+begin_src
+vault_account1 :
+  vault_user: user@email.net
+  vault_key: <api-key>
+
+vault_account2:
+  vault_user: user@email.net
+  vault_key: <api-key>
+  #+end_src
 * Example Playbook
 :PROPERTIES:
 :CUSTOM_ID: -example-playbook-
@@ -40,27 +50,26 @@ dnsimple_headers:
     dnsimple_sandbox: True
     dnsimple_account_id: 1691
     dnsimple_headers:
-      Authorization: 'Bearer <account api token>'
+      Authorization: "Bearer {{ vault.sandbox.key }}"
       Accepts:  "application/json"
 
     dnsimple_hosts_to_add:
       - hostname: test-record-one
         record_type: A
-        public: 127.0.0.1
+        ip_addr: 127.0.0.1
       - hostname:  test-record-two
         record_type: A
-        public: 127.0.0.2
+        ip_addr: 127.0.0.2
       - hostname: test-record-three
         record_type: A
-        public: 127.0.0.3
+        ip_addr: 127.0.0.3
 
     vault:
-      sandbox:
+      account1:
         user: "{{ vault_sandbox.vault_user }}"
         key: "{{ vault_sandbox.vault_key }}"
   roles:
     - { role: dnsimple }
 ...
 #+end_src
-* DONE Save DNS records prior to run
 * TODO Add per host record type: cname, a, mx, txt, etc

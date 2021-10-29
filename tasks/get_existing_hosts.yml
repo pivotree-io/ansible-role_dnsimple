@@ -43,10 +43,5 @@
   debug:
     msg: "{% if dnsimple_current_records_dict|selectattr('name', 'equalto', item.name)|list|json_query('[*].name') %}already_in_dns{% else %}not_in_dns{% endif %}"
   with_items: "{{ dnsimple_hosts_to_add }}"
-  #when: "dnsimple_current_records_dict|selectattr('name', 'equalto', item.name)|list|json_query('[*].name')"
   register: dnsimple_hosts_list_with_existing_records
-
-- name: Show what has been changed
-  debug:
-    msg:  "{{ dnsimple_hosts_list_with_existing_records }}"
 ...
