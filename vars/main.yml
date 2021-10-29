@@ -1,0 +1,3 @@
+- my_headers:
+    Authorization: "Bearer " + dnsimple_user.key + ""
+    Accepts:  "application/json"

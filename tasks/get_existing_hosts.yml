@@ -1,10 +1,47 @@
+# First iteration used Dig to check for existing records.
+#---
+#- name: Localhost> Record existing DNS Records into a new dictionary
+#  debug:
+#    msg: "{{ lookup('community.general.dig', '' + item.hostname + '.' + dnsimple_domain )}}"
+#  with_items:
+#  - "{{ dnsimple_hosts_to_add }}"
+#  register: dnsimple_hosts_existing_records
+#- debug:
+#    msg: "{{ dnsimple_hosts_existing_records }}"
+#...
 ---
-- name: Localhost> Record existing DNS Records into a new dictionary
-  debug:
-    msg: "{{ lookup('community.general.dig', '' + item.hostname + '.' + dnsimple_domain )}}"
-  with_items:
-  - "{{ dnsimple_hosts_to_add }}"
-  register: dnsimple_hosts_existing_records
+# This iteration will compare actual records in DNSimple and create a new dictionary with that info.
+
+#Since the community plugin does not support this, we will need to get the accountID for the needed API calls
+- name: get accountID
+  uri:
+    url: "https://api.sandbox.dnsimple.com/v2/whoami"
+    method: GET
+    headers: "{{ my_headers }}"
+  register: account_info
+
+- name: Extract AccountID
+  set_fact:
+    account_id: "{{ account_info.user.id }}"
+
 - debug:
-    msg: "{{ dnsimple_hosts_existing_records }}"
+    msg: "{{ account_id }}"
+
+#- name: get list of current records
+#  uri:
+#    url: "https://api.sandbox.dnsimple.com/v2/1691/zones/" + dnsimple_domain + "/records"
+#    method: GET
+#    headers: "{{ my_headers }}"
+#  register: my_return
+#
+#- name: create a dict from current records
+#  set_fact:
+#    existing_records: "{{ my_return.json.data }}"
+#
+#- name: test debg
+#  debug:
+#    msg: "already_in_dns"
+#  with_items: "{{ the_hosts }}"
+#  when: "{{ existing_records|selectattr('name', 'equalto', item.name)|list|json_query('[*].name') }}"
+#  register: existing
 ...

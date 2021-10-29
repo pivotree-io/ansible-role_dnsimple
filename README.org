@@ -1,0 +1,60 @@
+#+TITLE: Readme
+
+* DNSimple Role
+- Purpose of this role is to iterate over a hosts list in YAML, check for existing records, and in the case there is no record to create one in the supplied domain.
+* Requirements
+- Python Libraries:
+  - dnsimple
+  - dnspython
+* Role Variables
+#+begin_src
+dnsimple_user: '#This should reference: vaut.<user>.user'
+dnsimple_key: '#This should reference: vaut.<key>.user'
+dnsimple_domain: '#This is the DNSimple Domain to work under: https://dnsimple.com/a/<acct#>/domains'
+dnsimple_sandbox: '#Set to true if this is a sandbox account, otherwise False'
+dnsimple_hosts_to_add: '#YAML describing hosts to add, see [[#-example-playbook-][Example Playbook]]'
+vault:
+  sandbox:
+    user: "{{ vault_sandbox.vault_user }}"
+    key: "{{ vault_sandbox.vault_key }}"
+
+#+end_src
+* Vault
+- vault.yml content should be loaded into
+* Example Playbook
+:PROPERTIES:
+:CUSTOM_ID: -example-playbook-
+:END:
+#+begin_src yaml
+---
+- name: update DNSimple records
+  hosts: localhost
+  vars:
+    dnsimple_user: "{{ vault.sandbox.user }}"
+    dnsimple_key: "{{ vault.sandbox.key }}"
+    dnsimple_domain: "sassyatemyclothes.com"
+    dnsimple_sandbox: True
+    dnsimple_hosts_to_add:
+      - hostname: test-record-one
+        record_type: CNAME
+        public: 127.0.0.1
+
+      - hostname:  test-record-two
+        public: 127.0.0.2
+
+      - hostname: test-record-three
+        public: 127.0.0.3
+
+      - hostname: google
+        public: 127.0.0.3
+    vault:
+      sandbox:
+        user: "{{ vault_sandbox.vault_user }}"
+        key: "{{ vault_sandbox.vault_key }}"
+  roles:
+    - { role: dnsimple }
+
+...
+#+end_src
+* TODO Save DNS records prior to run
+* TODO Add per host record type: cname, a, mx, txt, etc
