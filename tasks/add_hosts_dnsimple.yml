@@ -1,8 +1,4 @@
 ---
-- debug:
-    msg: "{{ item.msg }}"
-  with_items: "{{ dnsimple_hosts_list_with_existing_records.results }}"
-
 - name: DNSimple API> Add hosts from hostfile YML to DNSimple
   community.general.dnsimple:
     account_email:        "{{ dnsimple_user }}"
@@ -12,10 +8,15 @@
     state:                present
     record:               '{{ item.item.name }}'
     value:                '{{ item.item.content }}'
-    type:                 '{{ item.item.record_type }}'
+    type:                 '{{ item.item.record_type | default("A") }}'
   delegate_to:            localhost
   register: existing_matching_records
   with_items:
     - "{{ dnsimple_hosts_list_with_existing_records.results }}"
   when: item.msg == "not_in_dns" and item.msg != "already_in_dns"
+
+- name: Localhost> Output changes
+  debug:
+    msg:
+      "{{ existing_matching_records }}"
 ...
