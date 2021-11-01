@@ -8,7 +8,7 @@
     state:                present
     record:               '{{ item.item.name }}'
     value:                '{{ item.item.content }}'
-    type:                 '{{ item.item.record_type | default('A') }}'
+    type:                 '{{ item.item.record_type | default("A") }}'
   delegate_to:            localhost
   register: existing_matching_records
   with_items:
