@@ -17,5 +17,5 @@
   register: existing_matching_records
   with_items:
     - "{{ dnsimple_hosts_list_with_existing_records.results }}"
-  when: item.msg != "already_in_dns"
+  when: item.msg == "not_in_dns" and item.msg != "already_in_dns"
 ...

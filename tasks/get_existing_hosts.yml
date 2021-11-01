@@ -47,7 +47,7 @@
     #This is one way to do it, but I believe the second is easier to parse and understand.
     #msg: "{% if dnsimple_current_records_dict|selectattr('name', 'equalto', item.name)|list|json_query('[*].name') %}already_in_dns{% else %}not_in_dns{% endif %}"
     #Iterate over item.name from our existing records, check for the attribute "name" and see if it exists within our list we want added to DNS
-    msg: "{% if item.name in dnsimple_current_records_dict | map(attribute='name') | list %}yes{% else %}no{% endif %}"
+    msg: "{% if item.name in dnsimple_current_records_dict | map(attribute='name') | list %}already_in_dns{% else %}not_in_dns{% endif %}"
   with_items: "{{ dnsimple_hosts_to_add }}"
   register: dnsimple_hosts_list_with_existing_records
 
