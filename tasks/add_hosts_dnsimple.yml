@@ -6,7 +6,7 @@
     domain:               "{{ dnsimple_domain }}"
     sandbox:              "{{ dnsimple_sandbox }}"
     state:                present
-    record:               '{{ item.item.name }}'
+    record:               '{{ item.item.name }}.{{ subdomain }}'
     value:                '{{ item.item.content }}'
     type:                 '{{ item.item.record_type | default("A") }}'
   delegate_to:            localhost
