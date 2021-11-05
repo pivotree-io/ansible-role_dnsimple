@@ -1,5 +1,5 @@
 ---
-- name: DNSimple API> Add hosts from hostfile YML to DNSimple
+- name: DNSimple API> Add hosts from hostfile YML to DNSimpletest
   community.general.dnsimple:
     account_email:        "{{ dnsimple_user }}"
     account_api_token:    "{{ dnsimple_key }}"
