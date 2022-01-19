@@ -1,0 +1,7 @@
+---
+- name: Iterate over domains and check/update corresponding records
+  include_tasks: update_dnsimple.yml
+  with_items: "{{ domains }}"
+  loop_control:
+    loop_var: domain_item
+...

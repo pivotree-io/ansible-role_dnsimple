@@ -1,0 +1,59 @@
+---
+- name: 'Check and update records for domain: {{ domain_item.dnsimple_domain }}'
+  debug:
+    msg: "https://github.com/pivotree-io/ansible-role_dnsimple"
+
+- name: If no hosts are defined AND dynamic groups are defined, we instead use that.
+  include_tasks: get_dynamic_hosts.yml
+  when: "domain_item.dnsimple_hosts_to_add is not defined and domain_item.dnsimple_dynamic_groups is defined"
+
+- name: If hosts to add exists in the domain yml we use that.
+  set_fact:
+    dnsimple_hosts_to_add: '{{ domain_item.dnsimple_hosts_to_add }}'
+  when: "domain_item.dnsimple_hosts_to_add is defined and domain_item.dnsimple_dynamic_groups is not defined"
+  no_log: true
+
+#Since the community plugin does not support this, we will need to get the accountID for the needed API calls
+- name: DNSimpleAPI - Get account ID using supplied key
+  uri:
+    url: "https://api.{% if domain_item.dnsimple_sandbox == true %}sandbox.{% endif %}dnsimple.com/v2/accounts"
+    method: GET
+    headers: "{{ domain_item.dnsimple_headers }}"
+  register: dnsimple_get_account_info
+  when: domain_item.dnsimple_account_id is not defined
+
+- name: Extract AccountID from previous task
+  set_fact:
+    account_id: "{{ dnsimple_get_account_info.json.data[0].id }}"
+  when: dnsimple_get_account_info is not defined
+
+- name: Build the API URL, if accountID is set already, use that, else use best guess from above
+  set_fact:
+    dnsimple_records_url: "https://api.{% if domain_item.dnsimple_sandbox == true %}sandbox.{% endif %}dnsimple.com/v2/{% if domain_item.dnsimple_account_id is defined %}{{ domain_item.dnsimple_account_id }}{% else %}{{ account_id }}{% endif %}/zones/{{ domain_item.dnsimple_domain }}"
+
+- name: Build new dictionary where every item is checked against current records
+  uri:
+    url: "{{ dnsimple_records_url }}/records?name={{ item.name }}{% if domain_item.dnsimple_subdomain is defined %}.{{ domain_item.dnsimple_subdomain }}{% endif %}"
+    method: GET
+    headers: "{{ domain_item.dnsimple_headers }}"
+  register: dnsimple_hosts_combined
+  with_items:
+    - "{{ dnsimple_hosts_to_add }}"
+  changed_when: "dnsimple_hosts_combined.json.data | length < 1"
+
+- name: If there is an existing record, pass this record to change_record task
+  include_tasks: change_record.yml
+  #only make a change if there is an existing record and the record content is incorrect
+  when: "(current_record.json.data | length == 1) and (current_record.item.content != current_record.json.data[0].content)"
+  with_items: "{{ dnsimple_hosts_combined.results }}"
+  loop_control:
+    loop_var: current_record
+
+- name: If there is no existing record, pass this record to add_record task
+  include_tasks: add_record.yml
+  #only make a change if there is no existing record
+  when: "current_record.json.data | length == 0"
+  with_items: "{{ dnsimple_hosts_combined.results }}"
+  loop_control:
+    loop_var: current_record
+...

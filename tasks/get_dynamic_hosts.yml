@@ -1,0 +1,10 @@
+---
+- name: Get currentgroup to pass to host task
+  set_fact:
+    dynamic_groups: "{{ domain_item.dnsimple_dynamic_groups['groups'] }}"
+
+- include_tasks: iter_hosts.yml
+  with_items: "{{ dynamic_groups }}"
+  loop_control:
+    loop_var: group
+...

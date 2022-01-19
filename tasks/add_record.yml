@@ -1,0 +1,15 @@
+---
+- name: add record {{ current_record.item.name }} {{ current_record.item.record_type }} {{ current_record.item.content }}
+  community.general.dnsimple:
+    account_email:        "{{ domain_item.dnsimple_user }}"
+    account_api_token:    "{{ domain_item.dnsimple_key }}"
+    domain:               "{{ domain_item.dnsimple_domain }}"
+    sandbox:              "{{ domain_item.dnsimple_sandbox }}"
+    state:                present
+    record:               '{{ current_record.item.name }}{% if domain_item.dnsimple_subdomain is defined %}.{{ domain_item.dnsimple_subdomain }}{% endif %}'
+    value:                '{{ current_record.item.content }}'
+    type:                 '{{ current_record.item.record_type | default("A") }}'
+    ttl:                 '{{ current_record.item.ttl | default("3600") }}'
+  delegate_to:            localhost
+  register: dnsimple_hosts_added
+...

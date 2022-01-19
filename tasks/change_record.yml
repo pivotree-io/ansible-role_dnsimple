@@ -1,0 +1,14 @@
+---
+- name: Set record name
+  set_fact:
+    record_name: "{{ current_record.item.name }}{% if domain_item.dnsimple_subdomain is defined %}.{{ domain_item.dnsimple_subdomain }}{% endif %}"
+
+- name: The {% if current_record.name is defined %}{{ current_record.name }}{% else %}record{% endif %} has changed, pass to update_record task
+  include_tasks: update_record.yml
+  #if the record content does not match, but the name is correct and type does not change, intiate in place update
+  when: "(record_name == current_record.json.data[0].name) and (current_record.item.record_type == current_record.json.data[0].type)"
+
+- name: The {% if current_record.name is defined %}{{ current_record.name }}{% else %}record{% endif %} has changed, pass to replace_record task
+  include_tasks: replace_record.yml
+  when: "(current_record.item.content != current_record.json.data[0].content) and (record_name == current_record.json.data[0].name) and (current_record.item.record_type != current_record.json.data[0].type)"
+...

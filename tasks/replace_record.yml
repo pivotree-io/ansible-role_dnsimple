@@ -1,0 +1,12 @@
+- name: Delete the record {{ current_record.item.name }} if the type has changed AND the record does not match
+  uri:
+    url: "{{ dnsimple_records_url }}/records/{{ current_record.json.data[0].id }}"
+    body_format: json
+    method: DELETE
+    headers: "{{ domain_item.dnsimple_headers }}"
+  register: dnsimple_delete
+  failed_when: "dnsimple_delete.status != 204"
+  changed_when: "dnsimple_delete.status == 204"
+
+- name: Add the new record
+  include_tasks: add_record.yml

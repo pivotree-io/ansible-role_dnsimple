@@ -1,0 +1,108 @@
+#+TITLE: Readme
+
+* DNSimple Role
+- Purpose of this role is to iterate over a hosts list in YAML, check for existing records, and in the case there is no record to create one in the supplied domain.
+[[./dnsimple_role.svg]]
+* Requirements
+- Python Libraries:
+  - dnsimple
+  - dnspython
+  - jmespath
+* Role Variables
+#+begin_src yaml
+domains:                    #domains is a list of dictionaries, each pertaining to the domain you want to work with.
+  - domain:                 #your first domain
+    dnsimple_user: "{{ vault.first_domain.user }}" #this maps to your vault below in plain text, which maps to an encrypted vault
+    dnsimple_key: "{{ vault.first_domain.key }}"
+    dnsimple_domain: "firstdomain.com"
+    dnsimple_sandbox: '#Set to true if this is a sandbox account, otherwise False' (sandbox.dnsimple.com)
+    dnsimple_account_id: '#This is the DNSimple Domain to work under: https://dnsimple.com/a/<acct#>/domains'
+    dnsimple_subdomain: '#A subdomain to append, mostly useful for dynamic inventory'
+    dnsimple_dynamic_groups: # This cannot be defined if dnsimple_hosts_to_add is defined
+      ttl: 3600
+      groups:
+       - '_02524___Progressive_Estate_Solutions_Inc__PES_'
+       - '_01781___Dyna_Lync_Telecom_Inc__DLT_'
+
+    dnsimple_hosts_to_add: '#Dictionary describing hosts to add, see [[#-example-playbook-][Example Playbook]]' # Cannot be defined if using dynamic groups above.
+      - { name: 'test-a-record-one', content: '192.168.1.1' } #A record is default and implicit
+      - { name: 'test-a-record-two', content: '192.168.1.2', record_type: 'A' } #But can also be specified
+      - { name: 'test-cname-record', content: 'example.com', record_type: 'CNAME' }
+      - { name: 'test-txt-record', content: 'some text', record_type: 'TXT' }
+    dnsimple_headers:
+      Authorization: "Bearer {{ vault.first_domain.key }}" #maps to vault
+      Accepts:  "application/json"
+
+vault:
+  first_domain:
+    user: "{{ vault_ops.vault_user }}"
+    key: "{{ vault_ops.vault_key }}"
+#+end_src
+* Vault
+- vault.yml content should contain your API keys and usernames in encrypted form. This is referenced in your playbook variables as shown above for easy search via grep,etc. vault.yml should looke like:
+  #+begin_src yaml
+vault_account1 :
+  vault_user: user@email.net
+  vault_key: <api-key>
+
+vault_account2:
+  vault_user: user@email.net
+  vault_key: <api-key>
+  #+end_src
+* Example Playbook
+:PROPERTIES:
+:CUSTOM_ID: -example-playbook-
+:END:
+#+begin_src yaml
+---
+#In this example you are working on the same account, but different domains: int.sassyatemyclothes.com and sassyatemyclothes.com
+- name: update DNSimple records
+  hosts: localhost
+  vars:
+    domains:
+      - domain:
+        dnsimple_user: "{{ vault.sandbox.user }}"
+        dnsimple_key: "{{ vault.sandbox.key }}"
+        dnsimple_domain: "sassyatemyclothes.com"
+        dnsimple_sandbox: True
+        dnsimple_account_id: "9999"
+        dnsimple_hosts_to_add:
+          - { name: 'test-a-record-one', content: '192.168.1.1' }
+          - { name: 'test-txt-record', content: 'some text', record_type: 'TXT' }
+        dnsimple_headers:
+          Authorization: "Bearer {{ vault.sandbox.key }}"
+          Accepts:  "application/json"
+
+      - domain_2:
+        dnsimple_user: "{{ vault.sandbox.user }}"
+        dnsimple_key: "{{ vault.sandbox.key }}"
+        dnsimple_domain: "int.sassyatemyclothes.com"
+        dnsimple_sandbox: True
+        dnsimple_account_id: "9999"
+        dnsimple_hosts_to_add:
+          - { name: 'internal-test-a-record', content: '192.168.1.5', record_type: 'A' }
+        dnsimple_headers:
+          Authorization: "Bearer {{ vault.sandbox.key }}"
+          Accepts:  "application/json"
+
+
+    vault:
+      ops :
+        user: "{{ vault_ops.vault_user }}"
+        key: "{{ vault_ops.vault_key }}"
+
+      sandbox:
+        user: "{{ vault_sandbox.vault_user }}"
+        key: "{{ vault_sandbox.vault_key }}"
+  roles:
+    - { role: dnsimple }
+...
+#+end_src
+* TODOs
+- DONE Add a "change" option that will not only add but make updates to hosts
+- Add a "decom" option so that hosts no longer in use can be removed - Unsure how to handle this as of yet
+- CANCELED Tie in with Device42 instead of manual creation of host dictionaries
+- DONE Use dynamic inventory groups for adding hosts
+- DONE Make this per domain, instead of only one so it can be expanded easily in the future
+- DONE Make A record the default
+- DONE Add per host record type: cname, a, mx, txt, etc

@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  author: ehilgendorf@pivotree.com
+  description: role to automate updating DNSimple from YAML
+  company: pivotree.com
+  min_ansible_version: 2.9
+  dependencies: []

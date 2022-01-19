@@ -1,0 +1,9 @@
+---
+- name: Get hosts from dynamic the group {{ group }} into the dictionary of records to create
+  set_fact:
+    dnsimple_hosts_to_add: "{{ dnsimple_hosts_to_add | default([]) + [{ 'name': item, 'content': hostvars[item]['ansible_ssh_host'], 'record_type': 'A', 'ttl': domain_item.dnsimple_dynamic_groups['ttl'] }] }}"
+  with_items:  "{{groups[group]}}"
+  # we do not want to include any fqdn of the domain
+  when: 'domain_item.dnsimple_domain not in item'
+  #no_log: true
+...

@@ -1,0 +1,14 @@
+---
+- name: update record to {{ current_record.item.name }} {{ current_record.item.record_type }} {{ current_record.item.content }}
+  uri:
+    url: "{{ dnsimple_records_url }}/records/{{ current_record.json.data[0].id }}"
+    body:
+      content: "{{ current_record.item.content }}"
+      ttl:     '{{ current_record.item.ttl | default("3600") }}'
+      type:     '{{ current_record.item.record_type | default("A") }}'
+    body_format: json
+    method: PATCH
+    headers: "{{ domain_item.dnsimple_headers }}"
+  changed_when: true
+  register: dnsimple_updated
+...
